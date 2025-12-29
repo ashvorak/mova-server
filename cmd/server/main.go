@@ -3,9 +3,11 @@ package main
 import (
 	"log"
 	"mova-server/internal/httpserver"
+	"mova-server/internal/users"
 )
 
 func main() {
-	server := httpserver.New()
+	userService := users.NewService()
+	server := httpserver.New(userService)
 	log.Fatal(server.ListenAndServe())
 }
