@@ -65,11 +65,17 @@ func (s *Handler) healthHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Handler) usersHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
+	if r.Method == http.MethodPost {
+		s.usersPostHandler(w, r)
+	} else if r.Method == http.MethodGet {
+		s.usersGetHandler(w)
+	} else {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
+}
 
+func (s *Handler) usersPostHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Header.Get("Content-Type") != "application/json" {
 		http.Error(w, "invalid content type", http.StatusUnsupportedMediaType)
 		return
@@ -93,5 +99,25 @@ func (s *Handler) usersHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		http.Error(w, "failed to encode response", http.StatusInternalServerError)
+	}
+}
+
+func (s *Handler) usersGetHandler(w http.ResponseWriter) {
+	users := s.userService.List()
+
+	userResponses := make([]UserResponse, 0, len(users))
+
+	for _, u := range users {
+		userResponses = append(userResponses, UserResponse{
+			ID:   u.ID,
+			Name: u.Name,
+		})
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	if err := json.NewEncoder(w).Encode(userResponses); err != nil {
+		http.Error(w, "failed to encode userResponces", http.StatusInternalServerError)
 	}
 }

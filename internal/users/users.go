@@ -30,3 +30,12 @@ func (s *Service) Create(name string) User {
 	s.users[id] = user
 	return user
 }
+
+func (s *Service) List() []User {
+	l := make([]User, 0, len(s.users))
+	for _, user := range s.users {
+		l = append(l, user)
+	}
+
+	return l
+}
