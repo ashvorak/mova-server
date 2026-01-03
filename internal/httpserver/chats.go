@@ -3,6 +3,7 @@ package httpserver
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 )
 
 type CreateChatRequest struct {
@@ -26,7 +27,7 @@ func (h *Handler) chatsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) chatsPostHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Header.Get("Content-Type") != "application/json" {
+	if !strings.HasPrefix(r.Header.Get("Content-Type"), "application/json") {
 		http.Error(w, "invalid content type", http.StatusUnsupportedMediaType)
 		return
 	}
@@ -74,6 +75,6 @@ func (h *Handler) chatsGetHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	if err := json.NewEncoder(w).Encode(chatResponses); err != nil {
-		http.Error(w, "failed to encode responce", http.StatusInternalServerError)
+		http.Error(w, "failed to encode response", http.StatusInternalServerError)
 	}
 }
