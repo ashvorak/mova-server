@@ -1,32 +1,32 @@
 package messages
 
 import (
+	"mova-server/internal/chats"
+	"mova-server/internal/users"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type Message struct {
-	ID        string
-	ChatID    string
-	UserID    string
+	ID        ID
+	ChatID    chats.ID
+	UserID    users.ID
 	Text      string
 	CreatedAt time.Time
 }
 
 type Service struct {
-	messages map[string][]Message // chatID -> messages
+	messages map[chats.ID][]Message
 }
 
 func NewService() *Service {
 	return &Service{
-		messages: make(map[string][]Message),
+		messages: make(map[chats.ID][]Message),
 	}
 }
 
-func (s *Service) Create(chatID string, userID string, text string) Message {
+func (s *Service) Create(chatID chats.ID, userID users.ID, text string) Message {
 	m := Message{
-		ID:        uuid.New().String(),
+		ID:        newID(),
 		ChatID:    chatID,
 		UserID:    userID,
 		Text:      text,
@@ -37,7 +37,7 @@ func (s *Service) Create(chatID string, userID string, text string) Message {
 	return m
 }
 
-func (s *Service) ListByChat(chatID string) []Message {
+func (s *Service) ListByChat(chatID chats.ID) []Message {
 	src := s.messages[chatID]
 
 	dst := make([]Message, len(src))

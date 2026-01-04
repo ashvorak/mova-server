@@ -38,11 +38,12 @@ func (h *Handler) chatsPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	chat := h.chatService.Create(req.UserIDs)
+	// chat := h.chatService.Create(req.UserIDs)
 
 	response := &ChatResponse{
-		ID:      chat.ID,
-		UserIDs: chat.UserIDs,
+		// TODO: move parsing it to a different layer
+		// ID: chat.ID.String(),
+		// UserIDs: chat.UserIDs,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -64,12 +65,13 @@ func (h *Handler) chatsGetHandler(w http.ResponseWriter, r *http.Request) {
 
 	chatResponses := make([]ChatResponse, 0, len(chats))
 
-	for _, c := range chats {
-		chatResponses = append(chatResponses, ChatResponse{
-			ID:      c.ID,
-			UserIDs: c.UserIDs,
-		})
-	}
+	// TODO: move parsing it to a different layer
+	// for _, c := range chats {
+	// 	chatResponses = append(chatResponses, ChatResponse{
+	// 		// ID: c.ID.String(),
+	// 		// UserIDs: c.UserIDs,
+	// 	})
+	// }
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

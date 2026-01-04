@@ -1,26 +1,22 @@
 package users
 
-import (
-	"github.com/google/uuid"
-)
-
 type User struct {
-	ID   string
+	ID   ID
 	Name string
 }
 
 type Service struct {
-	users map[string]User
+	users map[ID]User
 }
 
 func NewService() *Service {
 	return &Service{
-		users: make(map[string]User),
+		users: make(map[ID]User),
 	}
 }
 
 func (s *Service) Create(name string) User {
-	id := uuid.New().String()
+	id := newID()
 
 	user := User{
 		ID:   id,

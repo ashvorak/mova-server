@@ -2,6 +2,8 @@ package httpserver
 
 import (
 	"encoding/json"
+	"mova-server/internal/chats"
+	"mova-server/internal/users"
 	"net/http"
 	"strings"
 	"time"
@@ -44,12 +46,26 @@ func (h *Handler) messagesPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	m := h.messageService.Create(req.ChatID, req.UserID, req.Text)
+	// TODo: move parsing to a different layer
+	chatID, err := chats.ParseID(req.ChatID)
+	if err != nil {
+		http.Error(w, "failed to parse chat ID", http.StatusBadRequest)
+		return
+	}
+
+	userID, err := users.ParseID(req.UserID)
+	if err != nil {
+		http.Error(w, "failed to parse user ID", http.StatusBadRequest)
+		return
+	}
+
+	m := h.messageService.Create(chatID, userID, req.Text)
 
 	response := &MessageResponse{
-		ID:        m.ID,
-		ChatID:    m.ChatID,
-		UserID:    m.UserID,
+		// TODO: move it to a different layer
+		ID:        m.ID.String(),
+		ChatID:    m.ChatID.String(),
+		UserID:    m.UserID.String(),
 		Text:      m.Text,
 		CreatedAt: m.CreatedAt,
 	}
@@ -69,15 +85,21 @@ func (h *Handler) messagesGetHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	messages := h.messageService.ListByChat(chatID)
+	chatIDParsed, err := chats.ParseID(chatID)
+	if err != nil {
+		http.Error(w, "invalid chat_id query parameter", http.StatusBadRequest)
+		return
+	}
+	messages := h.messageService.ListByChat(chatIDParsed)
 
 	responses := make([]MessageResponse, 0, len(messages))
 
 	for _, m := range messages {
 		responses = append(responses, MessageResponse{
-			ID:        m.ID,
-			ChatID:    m.ChatID,
-			UserID:    m.UserID,
+			// TODO: move it to a different layer
+			ID:        m.ID.String(),
+			ChatID:    m.ChatID.String(),
+			UserID:    m.UserID.String(),
 			Text:      m.Text,
 			CreatedAt: m.CreatedAt,
 		})
