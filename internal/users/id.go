@@ -1,6 +1,6 @@
 package users
 
-import "mova-server/internal/id"
+import "mova-server/internal/shared/id"
 
 type ID id.ID
 
