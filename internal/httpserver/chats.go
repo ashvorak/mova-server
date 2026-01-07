@@ -17,13 +17,13 @@ type ChatResponse struct {
 }
 
 func (h *Handler) chatsHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost {
+	switch r.Method {
+	case http.MethodPost:
 		h.chatsPostHandler(w, r)
-	} else if r.Method == http.MethodGet {
+	case http.MethodGet:
 		h.chatsGetHandler(w, r)
-	} else {
+	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
-		return
 	}
 }
 

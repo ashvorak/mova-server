@@ -15,13 +15,13 @@ type UserResponse struct {
 }
 
 func (h *Handler) usersHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodPost {
+	switch r.Method {
+	case http.MethodPost:
 		h.usersPostHandler(w, r)
-	} else if r.Method == http.MethodGet {
+	case http.MethodGet:
 		h.usersGetHandler(w)
-	} else {
+	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
-		return
 	}
 }
 
