@@ -46,7 +46,6 @@ func (h *Handler) messagesPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODo: move parsing to a different layer
 	chatID, err := chats.ParseID(req.ChatID)
 	if err != nil {
 		http.Error(w, "failed to parse chat ID", http.StatusBadRequest)
@@ -62,7 +61,6 @@ func (h *Handler) messagesPostHandler(w http.ResponseWriter, r *http.Request) {
 	m := h.messageService.Create(chatID, userID, req.Text)
 
 	response := &MessageResponse{
-		// TODO: move it to a different layer
 		ID:        m.ID.String(),
 		ChatID:    m.ChatID.String(),
 		UserID:    m.UserID.String(),
@@ -96,7 +94,6 @@ func (h *Handler) messagesGetHandler(w http.ResponseWriter, r *http.Request) {
 
 	for _, m := range messages {
 		responses = append(responses, MessageResponse{
-			// TODO: move it to a different layer
 			ID:        m.ID.String(),
 			ChatID:    m.ChatID.String(),
 			UserID:    m.UserID.String(),

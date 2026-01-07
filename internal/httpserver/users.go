@@ -39,7 +39,6 @@ func (h *Handler) usersPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	user := h.userService.Create(req.Name)
 
-	// TODO: move it to a different layer
 	response := &UserResponse{
 		ID:   user.ID.String(),
 		Name: user.Name,
@@ -60,7 +59,6 @@ func (h *Handler) usersGetHandler(w http.ResponseWriter) {
 
 	for _, u := range users {
 		userResponses = append(userResponses, UserResponse{
-			// TODO: move it to a different layer
 			ID:   u.ID.String(),
 			Name: u.Name,
 		})

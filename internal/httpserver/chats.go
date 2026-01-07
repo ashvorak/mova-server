@@ -2,6 +2,7 @@ package httpserver
 
 import (
 	"encoding/json"
+	"mova-server/internal/users"
 	"net/http"
 	"strings"
 )
@@ -38,12 +39,25 @@ func (h *Handler) chatsPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// chat := h.chatService.Create(req.UserIDs)
+	var userIDs []users.ID
+	for _, uidStr := range req.UserIDs {
+		uid, err := users.ParseID(uidStr)
+		if err != nil {
+			http.Error(w, "failed to parse user ID", http.StatusBadRequest)
+			return
+		}
+		userIDs = append(userIDs, uid)
+	}
+	chat := h.chatService.Create(userIDs)
+
+	var userIDsStr []string
+	for _, uid := range chat.UserIDs {
+		userIDsStr = append(userIDsStr, uid.String())
+	}
 
 	response := &ChatResponse{
-		// TODO: move parsing it to a different layer
-		// ID: chat.ID.String(),
-		// UserIDs: chat.UserIDs,
+		ID:      chat.ID.String(),
+		UserIDs: userIDsStr,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -65,13 +79,17 @@ func (h *Handler) chatsGetHandler(w http.ResponseWriter, r *http.Request) {
 
 	chatResponses := make([]ChatResponse, 0, len(chats))
 
-	// TODO: move parsing it to a different layer
-	// for _, c := range chats {
-	// 	chatResponses = append(chatResponses, ChatResponse{
-	// 		// ID: c.ID.String(),
-	// 		// UserIDs: c.UserIDs,
-	// 	})
-	// }
+	for _, c := range chats {
+		var userIDs []string
+		for _, uid := range c.UserIDs {
+			userIDs = append(userIDs, uid.String())
+		}
+
+		chatResponses = append(chatResponses, ChatResponse{
+			ID:      c.ID.String(),
+			UserIDs: userIDs,
+		})
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
