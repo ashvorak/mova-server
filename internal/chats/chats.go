@@ -1,28 +1,27 @@
 package chats
 
 import (
-	"github.com/google/uuid"
+	"mova-server/internal/users"
 )
 
 type Chat struct {
-	ID      string
-	UserIDs []string
+	ID      ID
+	UserIDs []users.ID
 }
 
 type Service struct {
-	chats       map[string]Chat     // chatID -> Chat
-	chatsByUser map[string][]string // userID -> []chatID
+	chats       map[ID]Chat
+	chatsByUser map[users.ID][]ID
 }
 
 func NewService() *Service {
 	return &Service{
-		chats:       make(map[string]Chat),
-		chatsByUser: make(map[string][]string),
+		chats: make(map[ID]Chat),
 	}
 }
 
-func (s *Service) Create(userIDs []string) Chat {
-	id := uuid.New().String()
+func (s *Service) Create(userIDs []users.ID) Chat {
+	id := newID()
 
 	c := Chat{
 		ID:      id,
@@ -40,7 +39,13 @@ func (s *Service) Create(userIDs []string) Chat {
 func (s *Service) ListByUser(userID string) []Chat {
 	chats := make([]Chat, 0)
 
-	for _, chatID := range s.chatsByUser[userID] {
+	// TODO: Remove
+	parsedUserID, err := users.ParseID(userID)
+	if err != nil {
+		return chats
+	}
+
+	for _, chatID := range s.chatsByUser[parsedUserID] {
 		chats = append(chats, s.chats[chatID])
 	}
 
