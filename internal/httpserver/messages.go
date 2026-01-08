@@ -3,6 +3,7 @@ package httpserver
 import (
 	"encoding/json"
 	"mova-server/internal/chats"
+	"mova-server/internal/messages"
 	"mova-server/internal/users"
 	"net/http"
 	"strings"
@@ -77,22 +78,33 @@ func (h *Handler) messagesPostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) messagesGetHandler(w http.ResponseWriter, r *http.Request) {
-	chatID := r.URL.Query().Get("chat_id")
-	if len(chatID) == 0 {
+	chatIDStr := r.URL.Query().Get("chat_id")
+	if len(chatIDStr) == 0 {
 		http.Error(w, "missing chat_id query parameter", http.StatusBadRequest)
 		return
 	}
 
-	chatIDParsed, err := chats.ParseID(chatID)
+	chatID, err := chats.ParseID(chatIDStr)
 	if err != nil {
 		http.Error(w, "invalid chat_id query parameter", http.StatusBadRequest)
 		return
 	}
-	messages := h.messageService.ListByChat(chatIDParsed)
 
-	responses := make([]MessageResponse, 0, len(messages))
+	var afterID messages.ID
+	afterIDStr := r.URL.Query().Get("after")
+	if len(afterIDStr) != 0 {
+		afterID, err = messages.ParseID(afterIDStr)
+		if err != nil {
+			http.Error(w, "invalid after query parameter", http.StatusBadRequest)
+			return
+		}
+	}
 
-	for _, m := range messages {
+	msgs := h.messageService.ListByChatAfter(chatID, afterID)
+
+	responses := make([]MessageResponse, 0, len(msgs))
+
+	for _, m := range msgs {
 		responses = append(responses, MessageResponse{
 			ID:        m.ID.String(),
 			ChatID:    m.ChatID.String(),
