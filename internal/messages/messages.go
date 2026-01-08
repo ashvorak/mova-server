@@ -3,6 +3,7 @@ package messages
 import (
 	"mova-server/internal/chats"
 	"mova-server/internal/users"
+	"slices"
 	"time"
 )
 
@@ -44,4 +45,24 @@ func (s *Service) ListByChat(chatID chats.ID) []Message {
 	copy(dst, src)
 
 	return dst
+}
+
+func (s *Service) ListByChatAfter(chatID chats.ID, after ID) []Message {
+	messages := s.messages[chatID]
+
+	var start int
+
+	if after != "" {
+		idx := slices.IndexFunc(messages, func(m Message) bool {
+			return m.ID == after
+		})
+
+		if idx != -1 {
+			start = idx + 1
+		}
+	}
+
+	result := make([]Message, len(messages[start:]))
+	copy(result, messages[start:])
+	return result
 }
