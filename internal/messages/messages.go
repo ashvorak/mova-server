@@ -7,6 +7,10 @@ import (
 	"time"
 )
 
+const (
+	defaultListLimit = 50
+)
+
 type Message struct {
 	ID        ID
 	ChatID    chats.ID
@@ -47,22 +51,32 @@ func (s *Service) ListByChat(chatID chats.ID) []Message {
 	return dst
 }
 
-func (s *Service) ListByChatAfter(chatID chats.ID, after ID) []Message {
+func (s *Service) ListByChatAfter(chatID chats.ID, after ID, limit int) []Message {
 	messages := s.messages[chatID]
 
-	var start int
-
+	start := 0
 	if after != "" {
-		idx := slices.IndexFunc(messages, func(m Message) bool {
+		if idx := slices.IndexFunc(messages, func(m Message) bool {
 			return m.ID == after
-		})
-
-		if idx != -1 {
+		}); idx != -1 {
 			start = idx + 1
 		}
 	}
 
-	result := make([]Message, len(messages[start:]))
-	copy(result, messages[start:])
+	if limit <= 0 {
+		limit = defaultListLimit
+	}
+
+	if start >= len(messages) {
+		return nil
+	}
+
+	end := start + limit
+	if end > len(messages) {
+		end = len(messages)
+	}
+
+	result := make([]Message, end-start)
+	copy(result, messages[start:end])
 	return result
 }
