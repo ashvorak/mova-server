@@ -6,6 +6,7 @@ import (
 	"mova-server/internal/messages"
 	"mova-server/internal/users"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -95,12 +96,22 @@ func (h *Handler) messagesGetHandler(w http.ResponseWriter, r *http.Request) {
 	if len(afterIDStr) != 0 {
 		afterID, err = messages.ParseID(afterIDStr)
 		if err != nil {
-			http.Error(w, "invalid after query parameter", http.StatusBadRequest)
+			http.Error(w, "invalid after parameter", http.StatusBadRequest)
 			return
 		}
 	}
 
-	msgs := h.messageService.ListByChatAfter(chatID, afterID)
+	limitStr := r.URL.Query().Get("limit")
+	var limit int
+	if len(limitStr) != 0 {
+		limit, err = strconv.Atoi(limitStr)
+		if err != nil {
+			http.Error(w, "invalid limit parameter", http.StatusBadRequest)
+			return
+		}
+	}
+
+	msgs := h.messageService.ListByChatAfter(chatID, afterID, limit)
 
 	responses := make([]MessageResponse, 0, len(msgs))
 
