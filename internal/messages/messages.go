@@ -29,7 +29,24 @@ func NewService() *Service {
 	}
 }
 
-func (s *Service) Create(chatID chats.ID, userID users.ID, text string) Message {
+func (s *Service) Create(chatID chats.ID, userID users.ID, text string) (Message, error) {
+	_, ok := s.messages[chatID]
+	if !ok {
+		s.messages[chatID] = make([]Message, 0)
+	}
+
+	if chatID.IsEmpty() {
+		return Message{}, ErrEmptyChatID
+	}
+
+	if userID.IsEmpty() {
+		return Message{}, ErrEmptyUserID
+	}
+
+	if text == "" {
+		return Message{}, ErrEmptyText
+	}
+
 	m := Message{
 		ID:        newID(),
 		ChatID:    chatID,
@@ -39,20 +56,26 @@ func (s *Service) Create(chatID chats.ID, userID users.ID, text string) Message 
 	}
 
 	s.messages[chatID] = append(s.messages[chatID], m)
-	return m
+	return m, nil
 }
 
-func (s *Service) ListByChat(chatID chats.ID) []Message {
-	src := s.messages[chatID]
+func (s *Service) ListByChat(chatID chats.ID) ([]Message, error) {
+	src, ok := s.messages[chatID]
+	if !ok {
+		return nil, ErrMessagesNotFound
+	}
 
 	dst := make([]Message, len(src))
 	copy(dst, src)
 
-	return dst
+	return dst, nil
 }
 
-func (s *Service) ListByChatAfter(chatID chats.ID, after ID, limit int) []Message {
-	messages := s.messages[chatID]
+func (s *Service) ListByChatAfter(chatID chats.ID, after ID, limit int) ([]Message, error) {
+	messages, ok := s.messages[chatID]
+	if !ok {
+		return nil, ErrMessagesNotFound
+	}
 
 	start := 0
 	if after != "" {
@@ -68,7 +91,7 @@ func (s *Service) ListByChatAfter(chatID chats.ID, after ID, limit int) []Messag
 	}
 
 	if start >= len(messages) {
-		return nil
+		return messages, nil
 	}
 
 	end := start + limit
@@ -78,5 +101,5 @@ func (s *Service) ListByChatAfter(chatID chats.ID, after ID, limit int) []Messag
 
 	result := make([]Message, end-start)
 	copy(result, messages[start:end])
-	return result
+	return result, nil
 }

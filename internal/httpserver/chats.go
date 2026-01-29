@@ -48,7 +48,12 @@ func (h *Handler) chatsPostHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		userIDs = append(userIDs, uid)
 	}
-	chat := h.chatService.Create(userIDs)
+
+	chat, err := h.chatService.Create(userIDs)
+	if err != nil {
+		http.Error(w, "failed to create chat: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	var userIDsStr []string
 	for _, uid := range chat.UserIDs {

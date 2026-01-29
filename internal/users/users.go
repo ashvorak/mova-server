@@ -15,7 +15,11 @@ func NewService() *Service {
 	}
 }
 
-func (s *Service) Create(name string) User {
+func (s *Service) Create(name string) (User, error) {
+	if name == "" {
+		return User{}, ErrUserInvalidName
+	}
+
 	id := newID()
 
 	user := User{
@@ -24,7 +28,7 @@ func (s *Service) Create(name string) User {
 	}
 
 	s.users[id] = user
-	return user
+	return user, nil
 }
 
 func (s *Service) List() []User {

@@ -20,9 +20,12 @@ func NewService() *Service {
 	}
 }
 
-func (s *Service) Create(userIDs []users.ID) Chat {
-	id := newID()
+func (s *Service) Create(userIDs []users.ID) (Chat, error) {
+	if len(userIDs) == 0 {
+		return Chat{}, ErrEmptyUserIDs
+	}
 
+	id := newID()
 	c := Chat{
 		ID:      id,
 		UserIDs: userIDs,
@@ -33,21 +36,18 @@ func (s *Service) Create(userIDs []users.ID) Chat {
 		s.chatsByUser[u] = append(s.chatsByUser[u], c.ID)
 	}
 
-	return c
+	return c, nil
 }
 
-func (s *Service) ListByUser(userID string) []Chat {
-	chats := make([]Chat, 0)
-
-	// TODO: Remove
-	parsedUserID, err := users.ParseID(userID)
-	if err != nil {
-		return chats
+func (s *Service) ListByUser(userID users.ID) ([]Chat, error) {
+	if _, ok := s.chatsByUser[userID]; !ok {
+		return []Chat{}, ErrChatNotFound
 	}
 
-	for _, chatID := range s.chatsByUser[parsedUserID] {
+	chats := make([]Chat, 0)
+	for _, chatID := range s.chatsByUser[userID] {
 		chats = append(chats, s.chats[chatID])
 	}
 
-	return chats
+	return chats, nil
 }

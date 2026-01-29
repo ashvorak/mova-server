@@ -16,6 +16,10 @@ func ParseID(s string) (ID, error) {
 	return ID(parsed), nil
 }
 
+func (i ID) IsEmpty() bool {
+	return i == ""
+}
+
 func newID() ID {
 	return ID(id.New())
 }
