@@ -37,7 +37,11 @@ func (h *Handler) usersPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := h.userService.Create(req.Name)
+	user, err := h.userService.Create(req.Name)
+	if err != nil {
+		http.Error(w, "failed to create user: "+err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	response := &UserResponse{
 		ID:   user.ID.String(),

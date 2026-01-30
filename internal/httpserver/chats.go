@@ -74,13 +74,23 @@ func (h *Handler) chatsPostHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) chatsGetHandler(w http.ResponseWriter, r *http.Request) {
-	userID := r.URL.Query().Get("user_id")
-	if len(userID) == 0 {
+	userIDStr := r.URL.Query().Get("user_id")
+	if len(userIDStr) == 0 {
 		http.Error(w, "missing user_id query parameter", http.StatusBadRequest)
 		return
 	}
 
-	chats := h.chatService.ListByUser(userID)
+	userID, err := users.ParseID(userIDStr)
+	if err != nil {
+		http.Error(w, "failed to parse user ID", http.StatusBadRequest)
+		return
+	}
+
+	chats, err := h.chatService.ListByUser(userID)
+	if err != nil {
+		http.Error(w, "failed to list chats: "+err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	chatResponses := make([]ChatResponse, 0, len(chats))
 

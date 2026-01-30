@@ -60,7 +60,11 @@ func (h *Handler) messagesPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	m := h.messageService.Create(chatID, userID, req.Text)
+	m, err := h.messageService.Create(chatID, userID, req.Text)
+	if err != nil {
+		http.Error(w, "failed to create message: "+err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	response := &MessageResponse{
 		ID:        m.ID.String(),
@@ -111,7 +115,11 @@ func (h *Handler) messagesGetHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	msgs := h.messageService.ListByChatAfter(chatID, afterID, limit)
+	msgs, err := h.messageService.ListByChatAfter(chatID, afterID, limit)
+	if err != nil {
+		http.Error(w, "failed to list messages: "+err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	responses := make([]MessageResponse, 0, len(msgs))
 
