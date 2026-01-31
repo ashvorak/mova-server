@@ -60,6 +60,16 @@ func (h *Handler) messagesPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !h.chatService.Exists(chatID) {
+		http.Error(w, "chat not found", http.StatusNotFound)
+		return
+	}
+
+	if !h.chatService.HasUser(chatID, userID) {
+		http.Error(w, "user is not member of chat", http.StatusForbidden)
+		return
+	}
+
 	m, err := h.messageService.Create(chatID, userID, req.Text)
 	if err != nil {
 		http.Error(w, "failed to create message: "+err.Error(), http.StatusBadRequest)

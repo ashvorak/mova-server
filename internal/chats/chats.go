@@ -51,3 +51,23 @@ func (s *Service) ListByUser(userID users.ID) ([]Chat, error) {
 
 	return chats, nil
 }
+
+func (s *Service) HasUser(chatID ID, userID users.ID) bool {
+	chat, ok := s.chats[chatID]
+	if !ok {
+		return false
+	}
+
+	for _, u := range chat.UserIDs {
+		if u == userID {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (s *Service) Exists(chatID ID) bool {
+	_, ok := s.chats[chatID]
+	return ok
+}
