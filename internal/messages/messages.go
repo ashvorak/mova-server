@@ -20,33 +20,14 @@ type Message struct {
 }
 
 type Service struct {
-	messages map[chats.ID][]Message
+	repo Repository
 }
 
-func NewService() *Service {
-	return &Service{
-		messages: make(map[chats.ID][]Message),
-	}
+func NewService(repo Repository) *Service {
+	return &Service{repo: repo}
 }
 
 func (s *Service) Create(chatID chats.ID, userID users.ID, text string) (Message, error) {
-	_, ok := s.messages[chatID]
-	if !ok {
-		s.messages[chatID] = make([]Message, 0)
-	}
-
-	if chatID.IsEmpty() {
-		return Message{}, ErrEmptyChatID
-	}
-
-	if userID.IsEmpty() {
-		return Message{}, ErrEmptyUserID
-	}
-
-	if text == "" {
-		return Message{}, ErrEmptyText
-	}
-
 	m := Message{
 		ID:        newID(),
 		ChatID:    chatID,
@@ -55,26 +36,21 @@ func (s *Service) Create(chatID chats.ID, userID users.ID, text string) (Message
 		CreatedAt: time.Now(),
 	}
 
-	s.messages[chatID] = append(s.messages[chatID], m)
+	if err := s.repo.Save(m); err != nil {
+		return Message{}, err
+	}
+
 	return m, nil
 }
 
 func (s *Service) ListByChat(chatID chats.ID) ([]Message, error) {
-	src, ok := s.messages[chatID]
-	if !ok {
-		return nil, ErrMessagesNotFound
-	}
-
-	dst := make([]Message, len(src))
-	copy(dst, src)
-
-	return dst, nil
+	return s.repo.ListByChat(chatID)
 }
 
 func (s *Service) ListByChatAfter(chatID chats.ID, after ID, limit int) ([]Message, error) {
-	messages, ok := s.messages[chatID]
-	if !ok {
-		return nil, ErrMessagesNotFound
+	messages, err := s.repo.ListByChat(chatID)
+	if err != nil {
+		return nil, err
 	}
 
 	start := 0

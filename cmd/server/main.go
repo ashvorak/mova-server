@@ -11,7 +11,9 @@ import (
 func main() {
 	userService := users.NewService()
 	chatService := chats.NewService()
-	messageService := messages.NewService()
+
+	repo := messages.NewMemoryRepository()
+	messageService := messages.NewService(repo)
 
 	server := httpserver.New(userService, chatService, messageService)
 	log.Fatal(server.ListenAndServe())
