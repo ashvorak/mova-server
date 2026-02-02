@@ -25,7 +25,7 @@ func (s *Service) Create(userIDs []users.ID) (Chat, error) {
 		return Chat{}, ErrEmptyUserIDs
 	}
 
-	id := newID()
+	id := NewID()
 	c := Chat{
 		ID:      id,
 		UserIDs: userIDs,

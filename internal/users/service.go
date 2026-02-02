@@ -20,7 +20,7 @@ func (s *Service) Create(name string) (User, error) {
 		return User{}, ErrUserInvalidName
 	}
 
-	id := newID()
+	id := NewID()
 
 	user := User{
 		ID:   id,

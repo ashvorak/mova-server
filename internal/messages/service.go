@@ -29,7 +29,7 @@ func NewService(repo Repository) *Service {
 
 func (s *Service) Create(chatID chats.ID, userID users.ID, text string) (Message, error) {
 	m := Message{
-		ID:        newID(),
+		ID:        NewID(),
 		ChatID:    chatID,
 		UserID:    userID,
 		Text:      text,

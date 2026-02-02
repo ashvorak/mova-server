@@ -4,6 +4,10 @@ import "mova-server/internal/shared/id"
 
 type ID id.ID
 
+func NewID() ID {
+	return ID(id.New())
+}
+
 func (i ID) String() string {
 	return string(i)
 }
@@ -18,8 +22,4 @@ func ParseID(s string) (ID, error) {
 
 func (i ID) IsEmpty() bool {
 	return i == ""
-}
-
-func newID() ID {
-	return ID(id.New())
 }
