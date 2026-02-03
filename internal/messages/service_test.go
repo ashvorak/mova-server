@@ -25,17 +25,21 @@ func TestService_Create(t *testing.T) {
 	}
 	service := NewService(repo)
 
-	chatsID := chats.NewID()
+	chatID := chats.NewID()
 	userID := users.NewID()
 
-	msg, err := service.Create(chatsID, userID, "Hello, World!")
+	msg, err := service.Create(chatID, userID, "Hello, World!")
 
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	if msg.ChatID != chatsID {
-		t.Errorf("expected chat ID %s, got %s", chatsID, msg.ChatID)
+	if msg.ID == "" {
+		t.Errorf("expected message ID to be set")
+	}
+
+	if msg.ChatID != chatID {
+		t.Errorf("expected chat ID %s, got %s", chatID, msg.ChatID)
 	}
 
 	if msg.UserID != userID {
@@ -56,9 +60,15 @@ func TestService_ListByChat(t *testing.T) {
 	chatsID := chats.NewID()
 	userID := users.NewID()
 
-	service.Create(chatsID, userID, "First")
-	service.Create(chatsID, userID, "Second")
-	service.Create(chatsID, userID, "Third")
+	if _, err := service.Create(chatsID, userID, "First"); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if _, err := service.Create(chatsID, userID, "Second"); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if _, err := service.Create(chatsID, userID, "Third"); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 
 	messages, err := service.ListByChat(chatsID)
 
