@@ -67,7 +67,7 @@ func (s *Service) ListByChatAfter(chatID chats.ID, after ID, limit int) ([]Messa
 	}
 
 	if start >= len(messages) {
-		return messages, nil
+		return nil, nil
 	}
 
 	end := start + limit

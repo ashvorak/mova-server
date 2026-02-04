@@ -87,3 +87,91 @@ func TestService_ListByChat(t *testing.T) {
 		}
 	}
 }
+
+func TestService_ListByChatAfter(t *testing.T) {
+	repo := &fakeRepository{
+		mapByChat: make(map[chats.ID][]Message),
+	}
+	service := NewService(repo)
+
+	chatID := chats.NewID()
+	userID := users.NewID()
+
+	var msg1, msg2, msg3, msg4 Message
+	var err error
+	if msg1, err = service.Create(chatID, userID, "First"); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if msg2, err = service.Create(chatID, userID, "Second"); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if msg3, err = service.Create(chatID, userID, "Third"); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if msg4, err = service.Create(chatID, userID, "Fourth"); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	tests := []struct {
+		name     string
+		after    ID
+		limit    int
+		expected []Message
+	}{
+		{
+			name:     "no after, default limit",
+			after:    "",
+			limit:    0,
+			expected: []Message{msg1, msg2, msg3, msg4},
+		},
+		{
+			name:     "after second message",
+			after:    msg2.ID,
+			limit:    0,
+			expected: []Message{msg3, msg4},
+		},
+		{
+			name:     "after second message with limit",
+			after:    msg2.ID,
+			limit:    1,
+			expected: []Message{msg3},
+		},
+		{
+			name:     "after last message",
+			after:    msg4.ID,
+			limit:    10,
+			expected: nil,
+		},
+		{
+			name:     "after not existing message",
+			after:    ID("non-existing"),
+			limit:    0,
+			expected: []Message{msg1, msg2, msg3, msg4},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := service.ListByChatAfter(chatID, tt.after, tt.limit)
+
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+
+			if len(result) != len(tt.expected) {
+				t.Fatalf("expected %d messages, got %d", len(tt.expected), len(result))
+			}
+
+			for i := range result {
+				if result[i].ID != tt.expected[i].ID {
+					t.Errorf(
+						"at index %d: expected message ID %s, got %s",
+						i,
+						tt.expected[i].ID,
+						result[i].ID,
+					)
+				}
+			}
+		})
+	}
+}
