@@ -16,7 +16,8 @@ type Service struct {
 
 func NewService() *Service {
 	return &Service{
-		chats: make(map[ID]Chat),
+		chats:       make(map[ID]Chat),
+		chatsByUser: make(map[users.ID][]ID),
 	}
 }
 
