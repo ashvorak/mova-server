@@ -35,11 +35,7 @@ func (r *MemoryRepository) Save(msg Message) error {
 }
 
 func (r *MemoryRepository) ListByChat(chatID chats.ID) ([]Message, error) {
-	src, ok := r.messages[chatID]
-	if !ok {
-		return nil, ErrMessagesNotFound
-	}
-
+	src := r.messages[chatID]
 	dst := make([]Message, len(src))
 	copy(dst, src)
 	return dst, nil
