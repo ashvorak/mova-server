@@ -41,15 +41,10 @@ func (s *Service) Create(userIDs []users.ID) (Chat, error) {
 }
 
 func (s *Service) ListByUser(userID users.ID) ([]Chat, error) {
-	if _, ok := s.chatsByUser[userID]; !ok {
-		return []Chat{}, ErrChatNotFound
-	}
-
 	chats := make([]Chat, 0)
 	for _, chatID := range s.chatsByUser[userID] {
 		chats = append(chats, s.chats[chatID])
 	}
-
 	return chats, nil
 }
 
